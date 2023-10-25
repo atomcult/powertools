@@ -1,0 +1,197 @@
+name: powertools
+base: core22
+version: '0.1'
+summary: Single-line elevator pitch for your amazing snap
+description: |
+  This is my-snap's description. You have a paragraph or two to tell the
+  most important story about your snap. Keep it under 100 words though,
+  we live in tweetspace and your description wants to look good in the snap
+  store.
+
+grade: stable
+confinement: strict
+
+apps:
+  powertools:
+    command: /usr/libexec/powertools
+    environment: &env
+      TERMINFO_DIRS: ${SNAP}/usr/share/terminfo
+  eval:
+    command: /usr/libexec/powertools-eval
+    environment: *env
+
+parts:
+  scripts:
+    plugin: dump
+    source: ./src
+    organize:
+      '*': /usr/libexec/
+  environment:
+    plugin: nil
+    override-build: |
+      mkdir -p ${CRAFT_PART_INSTALL}/usr/libexec
+      >${CRAFT_PART_INSTALL}/usr/libexec/powertools.env printf \
+        'ARCH_TRIPLET="%s"\n' \
+        "${CRAFT_ARCH_TRIPLET}" 
+  fancy-utils:
+    plugin: nil
+    stage-packages:
+      - bat
+      - exa
+      - fd-find
+      - nnn
+      - ripgrep
+      - shellcheck
+      - libpcre3
+    # stage-snaps:
+    #   - helix
+    #   - bash-language-server
+    #   - yaml-language-server
+  basic-utils:
+    plugin: nil
+    # build-attributes:
+    #   - enable-patchelf
+    # override-build: |
+    #   craftctl default
+    #   ln -sf \
+    #     /snap/core22/current/lib/${CRAFT_ARCH_TRIPLET}/ld-linux-x86-64.so.2 \
+    #     ${CRAFT_PART_INSTALL}/lib64/ld-linux-x86-64.so.2
+    stage-packages:
+      # - libc6
+      # - libgcc-s1
+      - bash
+      - bash-completion
+      - bc
+      - binutils
+      - busybox-static
+      - curl
+      - dnsutils
+      - efibootmgr
+      - file
+      - htop
+      - httpie
+      - iotop
+      - lm-sensors
+      - lshw
+      - lsof
+      - minicom
+      - net-tools
+      - pastebinit
+      - pciutils
+      - pv
+      - rhash
+      - jq
+      - screen
+      - shellcheck
+      - smartmontools
+      - strace
+      - tcpdump
+      - time
+      - tmux
+      - tree
+      - unzip
+      - usbutils
+      - util-linux
+      - vim
+      - vim-common
+      - vim-runtime
+      - vim-tiny
+      - watchdog
+      - wget
+      - wireless-tools
+      - xz-utils
+      - zip
+      - zstd
+    stage:
+      - -bin/bash
+      - -usr/bin/perl*
+      - -usr/bin/py*
+      - -usr/lib/gcc
+      - -usr/lib/*/perl*
+      - -usr/lib/*/libperl*
+      - -usr/lib/python3/dist-packages/R*
+      - -usr/lib/python3/dist-packages/c*
+      - -usr/lib/python3/dist-packages/h*
+      - -usr/lib/python3/dist-packages/idna*
+      - -usr/lib/python3/dist-packages/pygments
+      - -usr/lib/python3/dist-packages/r*
+      - -usr/lib/python3/dist-packages/six*
+      - -usr/lib/python3/dist-packages/u*
+      - -usr/lib/python3.*
+      - -usr/share/doc
+      - -usr/share/locale
+      - -usr/share/man/
+      - -usr/share/perl*
+      - -usr/share/python*
+      - -usr/share/vim
+      # make sure we do not have pulled in lsb_release, it makes no sense
+      - -usr/bin/lsb_release
+  terminfo:
+    plugin: nil
+    stage-packages:
+      - foot-terminfo
+      - kitty-terminfo
+
+  # yaml-language-server:
+  #   plugin: npm
+  #   source: https://github.com/redhat-developer/yaml-language-server.git
+  #   source-type: git
+  #   source-tag: 1.14.0
+  #   build-snaps:
+  #     - node
+  #   build-packages:
+  #     - node-rimraf
+  #     - node-mkdirp
+  #     - eslint
+  #   override-build: |
+  #     node install yarn
+  #     yarn="${SNAPCRAFT_PART_BUILD}/node_modules/.bin/yarn"
+  #     "$yarn" install
+  #     "$yarn" run compile
+
+  # bash-language-server:
+  #   plugin: npm
+  #   source: https://github.com/bash-lsp/bash-language-server.git
+  #   source-type: git
+  #   source-tag: server-4.10.3
+  #   source-subdir: server
+  #   build-environment:
+  #     - NODEJS_FIXED_VERSION: "v16.20.1"
+  #   npm-node-version: $NODEJS_FIXED_VERSION
+  #   override-build: |
+  #     case "$SNAP_ARCH" in
+  #       amd64)   ARCH=x64          ;;
+  #       armhf)   ARCH=armv7l       ;;
+  #       ppc64el) ARCH=ppc64le      ;;
+  #       *)       ARCH="$SNAP_ARCH" ;;
+  #     esac
+  #     curl -s \
+  #       https://nodejs.org/dist/${NODEJS_FIXED_VERSION}/node-${NODEJS_FIXED_VERSION}-linux-$ARCH.tar.gz \
+  #       | tar -xzf - -C "$SNAPCRAFT_PART_INSTALL" --strip-components=1
+
+  #     npm install yarn
+
+  #     yarn="${SNAPCRAFT_PART_BUILD}/node_modules/.bin/yarn"
+  #     "$yarn" install
+  #     "$yarn" run compile
+  #     "$yarn" run reinstall-server
+
+  #     cp -r server "$SNAPCRAFT_PART_INSTALL"
+  #     # rm "${SNAPCRAFT_PART_INSTALL}/lib/node_modules/bash-language-server"
+  #     ln -s ../../server "${SNAPCRAFT_PART_INSTALL}/lib/node_modules/bash-language-server"
+  helix:
+    plugin: rust
+    rust-path: [helix-term]
+    source: https://github.com/helix-editor/helix.git
+    source-tag: 23.05
+    build-packages:
+      - cargo
+      - rustc
+      - g++
+    override-build: |
+      craftctl default
+
+      cp -r "${CRAFT_PART_BUILD}/runtime" "${CRAFT_PART_INSTALL}/bin/"
+      rm -r "${CRAFT_PART_INSTALL}/bin/runtime/grammars/sources"
+
+      find "${CRAFT_PART_INSTALL}" -type f -executable -exec strip {} \;

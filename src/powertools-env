@@ -1,0 +1,86 @@
+SNAP_PATH="/snap/${SNAP_INSTANCE_NAME}/current"
+BASE_PATH="/snap/core22/current"
+
+PATH="${SNAP_PATH}/bin"
+PATH="${PATH}:${SNAP_PATH}/usr/bin"
+PATH="${PATH}:/snap/bin"
+PATH="${PATH}:${BASE_PATH}/usr/local/sbin"
+PATH="${PATH}:${BASE_PATH}/usr/local/bin"
+PATH="${PATH}:${BASE_PATH}/usr/sbin"
+PATH="${PATH}:${BASE_PATH}/usr/bin"
+PATH="${PATH}:${BASE_PATH}/sbin"
+PATH="${PATH}:${BASE_PATH}/bin"
+PATH="${PATH}:${BASE_PATH}/usr/games"
+PATH="${PATH}:${BASE_PATH}/usr/local/games"
+export PATH
+
+LD_LIBRARY_PATH="${SNAP_PATH}/lib"
+LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SNAP_PATH}/usr/lib"
+LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SNAP_PATH}/lib/${ARCH_TRIPLET}"
+LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${SNAP_PATH}/usr/lib/${ARCH_TRIPLET}"
+export LD_LIBRARY_PATH
+
+XDG_DATA_DIRS="/usr/local/share"
+XDG_DATA_DIRS="${XDG_DATA_DIRS}:/usr/share"
+XDG_DATA_DIRS="${XDG_DATA_DIRS}:/snap/snapd/current/usr/share"
+XDG_DATA_DIRS="${XDG_DATA_DIRS}:${SNAP_PATH}/usr/local/share"
+XDG_DATA_DIRS="${XDG_DATA_DIRS}:${SNAP_PATH}/usr/share"
+export XDG_DATA_DIRS
+
+export MAGIC="${SNAP_PATH}/usr/share/misc/magic"
+export PYTHON_PATH="${SNAP_PATH}/usr/lib/python3/dist-packages"
+export TERMINFO_DIRS="${SNAP_PATH}/usr/share/terminfo"
+
+readonly RESET='\033[0m'
+readonly BOLD='\033[1m'
+
+readonly BLACK='\033[30m'
+readonly RED='\033[31m'
+readonly GREEN='\033[32m'
+readonly YELLOW='\033[33m'
+readonly BLUE='\033[34m'
+readonly MAGENTA='\033[35m'
+readonly CYAN='\033[36m'
+readonly WHITE='\033[37m'
+
+readonly BRIGHT_BLACK='\033[38m'
+readonly BRIGHT_RED='\033[39m'
+readonly BRIGHT_GREEN='\033[40m'
+readonly BRIGHT_YELLOW='\033[41m'
+readonly BRIGHT_BLUE='\033[42m'
+readonly BRIGHT_MAGENTA='\033[43m'
+readonly BRIGHT_CYAN='\033[44m'
+readonly BRIGHT_WHITE='\033[45m'
+
+rightprompt() {
+    local model="$(snap model --serial | grep model | awk '{ print $2 }')"
+    printf "${WHITE}%*s${RESET}" $COLUMNS "[${model}] "
+}
+
+prompt() {
+    printf "\n\[$(tput sc; rightprompt; tput rc)\] ${BLUE}\\\\u${RESET}@${GREEN}\\h${RESET} in ${CYAN}\\W${RESET}\n ${BLUE}λ${RESET} "
+}
+
+PS1="$(prompt)"
+
+alias sudo='sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
+alias cat="batcat"
+alias ls="exa"
+alias fd="fdfind"
+
+n ()
+{
+    [ "${NNNLVL:-0}" -eq 0 ] || {
+        echo "nnn is already running"
+        return
+    }
+
+    export NNN_TMPFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd"
+
+    command nnn "$@"
+
+    [ ! -f "$NNN_TMPFILE" ] || {
+        . "$NNN_TMPFILE"
+        rm -f "$NNN_TMPFILE" > /dev/null
+    }
+}

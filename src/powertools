@@ -1,0 +1,11 @@
+#!/bin/sh
+
+"${SNAP}/usr/bin/batcat" -l markdown --theme Dracula --plain <<EOF
+# Powertools
+
+## Usage
+\`powertools.help\` prints this help
+
+\`powertools\`      launch a shell
+\`powertools.eval\` output script to eval
+EOF

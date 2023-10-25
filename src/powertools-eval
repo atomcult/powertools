@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo SNAP_INSTANCE_NAME="${SNAP_INSTANCE_NAME}" | \
+batcat --language bash \
+    --theme Dracula \
+    --plain \
+    - \
+    "${SNAP}/usr/libexec/powertools.env" \
+    "${SNAP}/usr/libexec/powertools-env"
