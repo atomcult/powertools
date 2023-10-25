@@ -61,7 +61,16 @@ prompt() {
     printf "\n\[$(tput sc; rightprompt; tput rc)\] ${BLUE}\\\\u${RESET}@${GREEN}\\h${RESET} in ${CYAN}\\W${RESET}\n ${BLUE}λ${RESET} "
 }
 
+refreshprompt() {
+    : ${_columns_prev:=0}
+
+    [ "$COLUMNS" -ne "$_columns_prev" ] || return
+    _column_prev="$COLUMNS"
+    PS1="$(prompt)"
+}
+
 PS1="$(prompt)"
+PROMPT_COMMAND="refreshprompt"
 
 alias sudo='sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
 alias cat="batcat"
